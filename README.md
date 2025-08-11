@@ -22,6 +22,8 @@ A complete, production-ready CLI pipeline for generating animated videos using S
 - **Python**: Python 3.10+
 - **FFmpeg**: For video processing
 
+> 💡 **Need help?** Check our [documentation](docs/README.md) for detailed guides!
+
 ### Installation
 
 1. **Clone the repository**:
@@ -116,18 +118,32 @@ python main.py assemble \
 ```
 WhyWouldYou-v2/
 ├── main.py                 # Main CLI entrypoint
-├── sd_generator.py         # Stable Diffusion image generation
-├── pose_extractor.py       # Pose keypoint extraction
-├── flow_extractor.py       # Optical flow extraction
-├── svd_vid2vid.py         # SVD video generation
-├── coqui_tts.py           # Text-to-speech generation
-├── wav2lip_infer.py       # Lip-sync processing
-├── postprocess.py         # Video post-processing
-├── assemble.py            # Video assembly
+├── pipeline/               # Core pipeline modules
+│   ├── __init__.py         # Pipeline package
+│   ├── sd_generator.py     # Stable Diffusion image generation
+│   ├── pose_extractor.py   # Pose keypoint extraction
+│   ├── flow_extractor.py   # Optical flow extraction
+│   ├── svd_vid2vid.py     # SVD video generation
+│   ├── coqui_tts.py       # Text-to-speech generation
+│   ├── wav2lip_infer.py   # Lip-sync processing
+│   ├── postprocess.py     # Video post-processing
+│   └── assemble.py        # Video assembly
 ├── utils/                 # Utility modules
 │   ├── config.py          # Configuration management
 │   ├── logging.py         # Logging setup
 │   └── crop_to_aspect.py  # Aspect ratio utilities
+├── docs/                  # Documentation
+│   ├── README.md          # Documentation index
+│   ├── ENVIRONMENT_SETUP.md # Environment setup guide
+│   ├── RUNPOD_DEPLOYMENT.md # RunPod deployment guide
+│   └── LICENSING.md       # Model licensing information
+├── models/                # AI models directory
+│   └── README.md          # Models documentation
+├── scripts/               # Setup and utility scripts
+│   ├── setup_runpod.sh    # RunPod setup script
+│   ├── runpod_setup_one_liner.sh # Quick RunPod setup
+│   ├── download_models.sh # Model download script
+│   └── create_example_dataset.py # Example dataset creator
 ├── tests/                 # Test suite
 │   └── smoke_test.py      # Smoke tests
 ├── config.example.json    # Example configuration
@@ -343,14 +359,22 @@ python main.py --verbose run-all --config config.json ...
 
 ## 📝 License and Usage
 
-### Model Licenses
-- **Stable Diffusion**: CreativeML Open RAIL-M License
-- **SVD**: Stability AI License
-- **Wav2Lip**: MIT License
-- **Coqui TTS**: MIT License
+### 🎉 **All Models Are FREE!**
+
+#### Model Licenses
+- **Stable Diffusion**: ✅ CreativeML Open RAIL-M License (free for commercial use)
+- **SVD**: ⚠️ Stability AI License (check terms for commercial use)
+- **Wav2Lip**: ✅ MIT License (free for commercial use)
+- **Coqui TTS**: ✅ MIT License (free for commercial use)
+- **ControlNet**: ✅ Apache 2.0 License (free for commercial use)
+- **IP-Adapter**: ✅ Apache 2.0 License (free for commercial use)
+- **Real-ESRGAN**: ✅ BSD 3-Clause License (free for commercial use)
+- **MediaPipe**: ✅ Apache 2.0 License (free for commercial use)
 
 ### Commercial Usage
-⚠️ **Important**: Check individual model licenses for commercial use. Some models may require additional licensing for commercial applications.
+✅ **Most models are FREE for commercial use!** No paid subscriptions required.
+
+⚠️ **Note**: Only SVD and some LoRAs may have commercial restrictions - check individual licenses.
 
 ### Attribution
 When using this pipeline, please attribute:
@@ -422,6 +446,13 @@ python main.py run-all \
 - [Wav2Lip](https://github.com/Rudrabha/Wav2Lip)
 - [Coqui TTS](https://github.com/coqui-ai/TTS)
 - [MediaPipe](https://github.com/google/mediapipe)
+
+## 📚 Documentation
+
+- **[Environment Setup](docs/ENVIRONMENT_SETUP.md)** - How to set up your environment (no .env file needed!)
+- **[RunPod Deployment](docs/RUNPOD_DEPLOYMENT.md)** - Complete cloud GPU deployment guide
+- **[Licensing Guide](docs/LICENSING.md)** - Model licenses (all FREE and open source!)
+- **[Models Documentation](models/README.md)** - Required AI models and downloads
 
 ## 📞 Support
 

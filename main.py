@@ -13,14 +13,14 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 # Import our modules
-from sd_generator import SDGenerator
-from pose_extractor import PoseExtractor
-from flow_extractor import FlowExtractor
-from svd_vid2vid import SVDVid2Vid
-from coqui_tts import CoquiTTS
-from wav2lip_infer import Wav2LipInfer
-from postprocess import PostProcessor
-from assemble import VideoAssembler
+from pipeline.sd_generator import SDGenerator
+from pipeline.pose_extractor import PoseExtractor
+from pipeline.flow_extractor import FlowExtractor
+from pipeline.svd_vid2vid import SVDVid2Vid
+from pipeline.coqui_tts import CoquiTTS
+from pipeline.wav2lip_infer import Wav2LipInfer
+from pipeline.postprocess import PostProcessor
+from pipeline.assemble import VideoAssembler
 from utils.config import load_config, validate_config
 from utils.logging import setup_logging
 
@@ -89,6 +89,7 @@ Examples:
     svd_parser.add_argument("--strength", type=float, help="Motion strength")
     svd_parser.add_argument("--guidance_scale", type=float, help="Guidance scale")
     svd_parser.add_argument("--seed", type=int, help="Random seed")
+    svd_parser.add_argument("--debug", action="store_true", help="Generate debug frames for troubleshooting")
     
     # TTS subcommand
     tts_parser = subparsers.add_parser("tts", help="Generate TTS audio using Coqui")
@@ -171,6 +172,18 @@ def run_svd_vid2vid(args: argparse.Namespace, config: Dict[str, Any]) -> None:
     logger.info("Running SVD vid2vid...")
     
     svd = SVDVid2Vid(config)
+    
+    # Create debug frames if requested
+    if hasattr(args, 'debug') and args.debug:
+        debug_dir = os.path.join(os.path.dirname(args.out), "debug")
+        logger.info(f"Creating debug frames in: {debug_dir}")
+        svd.create_debug_frames(
+            input_image=args.input_image,
+            motion_dir=args.motion_dir,
+            output_dir=debug_dir,
+            num_frames=5
+        )
+    
     svd.generate(
         input_image=args.input_image,
         motion_dir=args.motion_dir,
