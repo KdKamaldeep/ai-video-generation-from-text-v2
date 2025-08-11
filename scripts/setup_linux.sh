@@ -259,7 +259,24 @@ setup_python_env() {
     pip install --upgrade pip setuptools wheel
     
     print_status "Installing Python dependencies..."
-    pip install -r "$PROJECT_ROOT/requirements.txt"
+    
+    # Try to install requirements with better error handling
+    if ! pip install -r "$PROJECT_ROOT/requirements.txt"; then
+        print_warning "First attempt failed. Trying with --no-deps for problematic packages..."
+        
+        # Install core packages first
+        pip install torch>=2.0.0,<3.0.0 torchvision>=0.15.0,<1.0.0 torchaudio>=2.0.0,<1.0.0
+        pip install diffusers>=0.24.0,<1.0.0 transformers>=4.35.0,<5.0.0 accelerate>=0.24.0,<1.0.0
+        pip install opencv-python>=4.8.0 Pillow>=10.0.0 numpy>=1.24.0 scipy>=1.11.2
+        pip install librosa>=0.10.0,<1.0.0 soundfile>=0.12.0 mediapipe>=0.10.0
+        pip install TTS>=0.22.0,<1.0.0 scikit-learn>=1.3.0 matplotlib>=3.7.0
+        pip install tqdm>=4.65.0 click>=8.1.0 pyyaml>=6.0 python-dotenv>=1.0.0
+        
+        # Try xformers separately (can be problematic)
+        if ! pip install xformers>=0.0.22,<1.0.0; then
+            print_warning "xformers installation failed. Continuing without it..."
+        fi
+    fi
     
     # Install additional useful packages
     print_status "Installing additional packages..."
