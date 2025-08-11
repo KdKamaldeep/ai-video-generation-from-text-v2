@@ -345,31 +345,13 @@ download_models() {
     echo -e "${BLUE}=== Stable Video Diffusion Models ===${NC}"
     download_hf_model "stabilityai/stable-video-diffusion-img2vid-xt" "$MODELS_DIR/svd" "SVD Img2Vid XT"
     
-    # Download ControlNet models (optional)
-    echo -e "${BLUE}=== ControlNet Models ===${NC}"
-    download_hf_model "lllyasviel/ControlNet-v1-1" "$MODELS_DIR/controlnet" "ControlNet v1.1"
-    
-    # Download IP-Adapter models (optional)
-    echo -e "${BLUE}=== IP-Adapter Models ===${NC}"
-    download_hf_model "h94/IP-Adapter" "$MODELS_DIR/ip_adapter" "IP-Adapter"
-    
-    # Clone external repositories
-    echo -e "${BLUE}=== External Repositories ===${NC}"
-    clone_repo "https://github.com/Rudrabha/Wav2Lip.git" "$EXTERNAL_DIR/Wav2Lip" "Wav2Lip"
-    clone_repo "https://github.com/xinntao/Real-ESRGAN.git" "$EXTERNAL_DIR/Real-ESRGAN" "Real-ESRGAN"
-    
-    # Download Wav2Lip models
-    echo -e "${BLUE}=== Wav2Lip Models ===${NC}"
-    WAV2LIP_MODEL_URL="https://github.com/Rudrabha/Wav2Lip/releases/download/v1.0/wav2lip.pth"
-    S3FD_MODEL_URL="https://github.com/Rudrabha/Wav2Lip/releases/download/v1.0/s3fd.pth"
-    
-    download_model "$WAV2LIP_MODEL_URL" "$MODELS_DIR/wav2lip.pth" "Wav2Lip model"
-    download_model "$S3FD_MODEL_URL" "$MODELS_DIR/s3fd.pth" "S3FD face detection model"
-    
-    # Download Real-ESRGAN models
-    echo -e "${BLUE}=== Real-ESRGAN Models ===${NC}"
-    REALESRGAN_MODEL_URL="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
-    download_model "$REALESRGAN_MODEL_URL" "$MODELS_DIR/RealESRGAN_x4plus.pth" "Real-ESRGAN x4+ model"
+    # Skip optional models for now (Wav2Lip, ControlNet, IP-Adapter, Real-ESRGAN)
+    echo -e "${YELLOW}⚠ Skipping optional models: Wav2Lip, ControlNet, IP-Adapter, Real-ESRGAN${NC}"
+    echo -e "${BLUE}These can be downloaded later if needed:${NC}"
+    echo -e "${BLUE}  - Wav2Lip: For lip-sync (optional)${NC}"
+    echo -e "${BLUE}  - ControlNet: For pose control (optional)${NC}"
+    echo -e "${BLUE}  - IP-Adapter: For style control (optional)${NC}"
+    echo -e "${BLUE}  - Real-ESRGAN: For video upscaling (optional)${NC}"
     
     echo -e "${GREEN}✓ All models downloaded successfully!${NC}"
 }
@@ -397,7 +379,7 @@ setup_configs() {
     "sample_rate": 24000,
     "model": "tts_models/multilingual/multi-dataset/xtts_v2"
   },
-  "wav2lip_enabled": true,
+  "wav2lip_enabled": false,
   "wav2lip_model": "$MODELS_DIR/wav2lip.pth",
   "face_detection_model": "$MODELS_DIR/s3fd.pth",
   "post_rife": false,
@@ -492,18 +474,20 @@ Models downloaded on: $(date)
 Pipeline version: WhyWouldYou-v2
 RunPod Setup: $(date)
 
-Downloaded models:
+Downloaded models (Essential only):
 - Stable Diffusion v1.5: $MODELS_DIR/sd/
 - SVD Img2Vid XT: $MODELS_DIR/svd/
-- ControlNet v1.1: $MODELS_DIR/controlnet/
-- IP-Adapter: $MODELS_DIR/ip_adapter/
-- Wav2Lip: $MODELS_DIR/wav2lip.pth
-- S3FD: $MODELS_DIR/s3fd.pth
-- Real-ESRGAN: $MODELS_DIR/RealESRGAN_x4plus.pth
+- Coqui TTS: Auto-downloaded on first use
+
+Skipped optional models:
+- ControlNet v1.1: For pose control (optional)
+- IP-Adapter: For style control (optional)
+- Wav2Lip: For lip-sync (optional)
+- S3FD: Face detection for Wav2Lip (optional)
+- Real-ESRGAN: For video upscaling (optional)
 
 External repositories:
-- Wav2Lip: $EXTERNAL_DIR/Wav2Lip/
-- Real-ESRGAN: $EXTERNAL_DIR/Real-ESRGAN/
+- None (skipped for minimal setup)
 
 System Information:
 - GPU: $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo "None")
