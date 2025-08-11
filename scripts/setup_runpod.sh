@@ -658,13 +658,13 @@ main() {
     fi
     
     # Setup project structure
-    setup_project
+    #etup_project
     
     # Setup Python environment
-   #setup_python
+    setup_python
     
     # Download models
-    download_models
+    #download_models
     
     # Setup configurations
     setup_configs

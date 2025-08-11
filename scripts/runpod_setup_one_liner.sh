@@ -32,7 +32,7 @@ else
 fi
 
 # Install other dependencies
-pip install diffusers transformers accelerate xformers opencv-python Pillow numpy moviepy ffmpeg-python librosa soundfile mediapipe TTS argparse json logging subprocess tempfile pathlib typing
+pip install diffusers transformers accelerate xformers opencv-python Pillow numpy ffmpeg-python librosa soundfile mediapipe TTS argparse json logging subprocess tempfile pathlib typing
 
 # Install additional useful packages
 pip install jupyter ipywidgets matplotlib seaborn pandas scikit-learn scipy tqdm psutil GPUtil nvidia-ml-py3

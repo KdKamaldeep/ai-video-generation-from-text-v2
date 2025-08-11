@@ -10,7 +10,8 @@ import os
 import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Optional
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, TextClip, concatenate_videoclips
+# from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip, TextClip, concatenate_videoclips
+# Using FFmpeg as primary method, OpenCV for fallback operations
 import tempfile
 
 logger = logging.getLogger(__name__)
@@ -96,17 +97,14 @@ class VideoAssembler:
             if outro_clip and os.path.exists(outro_clip):
                 final_clips.append(outro_clip)
             
-            # Assemble video
+            # Assemble video using FFmpeg
             if self.ffmpeg_available:
                 result_path = self._assemble_with_ffmpeg(
                     final_clips, output_path, background_audio,
                     crossfade_duration, add_captions, caption_file, watermark
                 )
             else:
-                result_path = self._assemble_with_moviepy(
-                    final_clips, output_path, background_audio,
-                    crossfade_duration, add_captions, caption_file, watermark
-                )
+                raise RuntimeError("FFmpeg is required for video assembly. Please install FFmpeg.")
             
             logger.info(f"Video assembly completed: {result_path}")
             return result_path
@@ -262,87 +260,8 @@ class VideoAssembler:
         
         return ";".join(filters)
     
-    def _assemble_with_moviepy(
-        self,
-        clips: List[str],
-        output_path: str,
-        background_audio: Optional[str],
-        crossfade_duration: float,
-        add_captions: bool,
-        caption_file: Optional[str],
-        watermark: Optional[str]
-    ) -> str:
-        """Assemble video using MoviePy (fallback)."""
-        try:
-            # Load video clips
-            video_clips = []
-            for clip_path in clips:
-                clip = VideoFileClip(clip_path)
-                # Resize to output resolution
-                clip = clip.resize(self.output_resolution)
-                video_clips.append(clip)
-            
-            # Concatenate clips
-            if len(video_clips) > 1 and crossfade_duration > 0:
-                # Add crossfades
-                final_clip = video_clips[0]
-                for i in range(1, len(video_clips)):
-                    final_clip = CompositeVideoClip([
-                        final_clip,
-                        video_clips[i].set_start(final_clip.duration - crossfade_duration)
-                    ]).crossfadein(crossfade_duration)
-            else:
-                final_clip = concatenate_videoclips(video_clips)
-            
-            # Add background audio if provided
-            if background_audio and os.path.exists(background_audio):
-                bg_audio = AudioFileClip(background_audio)
-                # Loop background audio if needed
-                if bg_audio.duration < final_clip.duration:
-                    bg_audio = bg_audio.loop(duration=final_clip.duration)
-                else:
-                    bg_audio = bg_audio.subclip(0, final_clip.duration)
-                
-                final_clip = final_clip.set_audio(bg_audio)
-            
-            # Add captions if provided
-            if add_captions and caption_file and os.path.exists(caption_file):
-                final_clip = self._add_captions_moviepy(final_clip, caption_file)
-            
-            # Write final video
-            final_clip.write_videofile(
-                output_path,
-                codec='libx264',
-                audio_codec='aac',
-                fps=self.default_fps
-            )
-            
-            # Clean up
-            final_clip.close()
-            for clip in video_clips:
-                clip.close()
-            
-            return output_path
-            
-        except Exception as e:
-            logger.error(f"MoviePy assembly failed: {e}")
-            raise
-    
-    def _add_captions_moviepy(self, video_clip, caption_file: str):
-        """Add captions using MoviePy."""
-        # This is a simplified caption implementation
-        # In practice, you'd parse the caption file and add text clips
-        
-        # Create a simple text overlay
-        txt_clip = TextClip(
-            "Generated Video",
-            fontsize=70,
-            color='white',
-            stroke_color='black',
-            stroke_width=2
-        ).set_position(('center', 'bottom')).set_duration(video_clip.duration)
-        
-        return CompositeVideoClip([video_clip, txt_clip])
+    # MoviePy methods removed - using FFmpeg as primary method
+    # FFmpeg provides better performance and reliability for video assembly
     
     def create_thumbnail(
         self,
@@ -405,7 +324,7 @@ class VideoAssembler:
         outro_duration: float = 3.0
     ) -> str:
         """
-        Add intro and outro to video.
+        Add intro and outro to video using FFmpeg.
         
         Args:
             video_path: Input video path
@@ -419,34 +338,55 @@ class VideoAssembler:
             Path to video with intro/outro
         """
         try:
-            clips = []
+            if not self.ffmpeg_available:
+                raise RuntimeError("FFmpeg is required for intro/outro addition")
             
-            # Add intro
+            # Prepare input files
+            input_files = []
+            filter_parts = []
+            
+            # Add intro if provided
             if intro_path and os.path.exists(intro_path):
-                intro_clip = VideoFileClip(intro_path)
-                if intro_clip.duration > intro_duration:
-                    intro_clip = intro_clip.subclip(0, intro_duration)
-                clips.append(intro_clip)
+                input_files.extend(["-i", intro_path])
+                filter_parts.append(f"[0:v]trim=duration={intro_duration}[intro]")
             
             # Add main video
-            main_clip = VideoFileClip(video_path)
-            clips.append(main_clip)
+            input_files.extend(["-i", video_path])
+            filter_parts.append("[1:v]")
             
-            # Add outro
+            # Add outro if provided
             if outro_path and os.path.exists(outro_path):
-                outro_clip = VideoFileClip(outro_path)
-                if outro_clip.duration > outro_duration:
-                    outro_clip = outro_clip.subclip(0, outro_duration)
-                clips.append(outro_clip)
+                input_files.extend(["-i", outro_path])
+                filter_parts.append(f"[2:v]trim=duration={outro_duration}[outro]")
             
-            # Concatenate
-            final_clip = concatenate_videoclips(clips)
-            final_clip.write_videofile(output_path, codec='libx264')
+            # Build filter complex
+            if len(filter_parts) == 1:
+                # Only main video
+                filter_complex = "[1:v]"
+            elif len(filter_parts) == 2 and intro_path:
+                # Intro + main video
+                filter_complex = f"[intro][1:v]concat=n=2:v=1[outv]"
+            elif len(filter_parts) == 2 and outro_path:
+                # Main video + outro
+                filter_complex = f"[1:v][outro]concat=n=2:v=1[outv]"
+            else:
+                # Intro + main + outro
+                filter_complex = f"[intro][1:v][outro]concat=n=3:v=1[outv]"
             
-            # Clean up
-            final_clip.close()
-            for clip in clips:
-                clip.close()
+            # Build FFmpeg command
+            cmd = ["ffmpeg", "-y"] + input_files + [
+                "-filter_complex", filter_complex,
+                "-map", "[outv]",
+                "-c:v", "libx264",
+                "-preset", "medium",
+                "-crf", "23",
+                output_path
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                raise RuntimeError(f"Intro/outro addition failed: {result.stderr}")
             
             return output_path
             

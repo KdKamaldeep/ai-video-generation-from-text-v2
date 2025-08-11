@@ -10,7 +10,8 @@ import os
 import subprocess
 from pathlib import Path
 from typing import Dict, Any, List, Tuple, Optional
-from moviepy.editor import VideoFileClip, CompositeVideoClip, vfx
+# from moviepy.editor import VideoFileClip, CompositeVideoClip, vfx
+# Using OpenCV as alternative to MoviePy
 import tempfile
 
 logger = logging.getLogger(__name__)
@@ -199,29 +200,36 @@ class PostProcessor:
             return input_path
     
     def _apply_motion_smears(self, input_path: str) -> str:
-        """Apply motion blur smears for cartoon effect."""
+        """Apply motion blur smears for cartoon effect using OpenCV."""
         # Create temporary output file
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
             temp_output = temp_file.name
         
         try:
-            # Use MoviePy for motion smears
-            clip = VideoFileClip(input_path)
+            # Use OpenCV for motion smears
+            cap = cv2.VideoCapture(input_path)
+            fps = int(cap.get(cv2.CAP_PROP_FPS))
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             
-            # Apply motion blur effect
-            def add_motion_smear(frame):
-                # Create motion smear effect
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(temp_output, fourcc, fps, (width, height))
+            
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                
+                # Apply motion blur effect
                 blurred = cv2.GaussianBlur(frame, (15, 15), 0)
                 # Blend with original frame
                 alpha = 0.3
-                return cv2.addWeighted(frame, 1 - alpha, blurred, alpha, 0)
+                processed_frame = cv2.addWeighted(frame, 1 - alpha, blurred, alpha, 0)
+                
+                out.write(processed_frame)
             
-            # Apply effect
-            processed_clip = clip.fl_image(add_motion_smear)
-            processed_clip.write_videofile(temp_output, codec='libx264')
-            
-            clip.close()
-            processed_clip.close()
+            cap.release()
+            out.release()
             
             return temp_output
             
@@ -230,25 +238,33 @@ class PostProcessor:
             return input_path
     
     def _apply_squash_stretch(self, input_path: str) -> str:
-        """Apply squash & stretch effects for cartoon animation."""
+        """Apply squash & stretch effects for cartoon animation using OpenCV."""
         # Create temporary output file
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as temp_file:
             temp_output = temp_file.name
         
         try:
-            # Use MoviePy for squash & stretch
-            clip = VideoFileClip(input_path)
+            # Use OpenCV for squash & stretch
+            cap = cv2.VideoCapture(input_path)
+            fps = int(cap.get(cv2.CAP_PROP_FPS))
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             
-            # Apply squash & stretch effect
-            def apply_squash_stretch(get_frame, t):
-                frame = get_frame(t)
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(temp_output, fourcc, fps, (width, height))
+            
+            frame_count = 0
+            while cap.isOpened():
+                ret, frame = cap.read()
+                if not ret:
+                    break
                 
-                # Calculate squash factor based on time
-                # This is a simplified effect - in practice you'd analyze motion
-                squash_factor = 1.0 + 0.1 * np.sin(t * 2 * np.pi / clip.duration)
+                # Calculate squash factor based on frame position
+                progress = frame_count / total_frames
+                squash_factor = 1.0 + 0.1 * np.sin(progress * 2 * np.pi)
                 
                 # Apply scaling
-                height, width = frame.shape[:2]
                 new_height = int(height * squash_factor)
                 new_width = int(width / squash_factor)
                 
@@ -262,14 +278,11 @@ class PostProcessor:
                 
                 result[y_offset:y_offset + new_height, x_offset:x_offset + new_width] = resized
                 
-                return result
+                out.write(result)
+                frame_count += 1
             
-            # Apply effect
-            processed_clip = clip.fl(apply_squash_stretch)
-            processed_clip.write_videofile(temp_output, codec='libx264')
-            
-            clip.close()
-            processed_clip.close()
+            cap.release()
+            out.release()
             
             return temp_output
             

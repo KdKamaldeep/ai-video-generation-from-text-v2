@@ -14,7 +14,7 @@ numpy>=1.24.0
 scipy>=1.11.0
 
 # Video processing
-moviepy==2.2.1
+# moviepy==2.2.1  # Removed - using OpenCV and FFmpeg instead
 ffmpeg-python>=0.2.0
 
 # Audio processing
