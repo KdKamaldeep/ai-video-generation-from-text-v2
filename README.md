@@ -44,10 +44,12 @@ The easiest way to get started is using RunPod with our automated setup script!
    sudo ./scripts/setup_runpod.sh
    ```
 
-3. **Activate and start**:
+3. **Activate environment**:
    ```bash
    source /workspace/venv/bin/activate
-   ./start.sh
+   export WORKSPACE_DIR=/workspace
+   export MODELS_DIR=/workspace/models
+   export PYTHONPATH=/workspace:$PYTHONPATH
    ```
 
 4. **Test the pipeline**:
@@ -63,7 +65,8 @@ The easiest way to get started is using RunPod with our automated setup script!
 ✅ **Sets up Python environment** with CUDA support  
 ✅ **Creates configuration files** ready to use  
 ✅ **Runs tests** to ensure everything works  
-✅ **All models are FREE and open source!** 🎉
+✅ **All models are FREE and open source!** 🎉  
+✅ **No extra startup scripts** - direct environment activation
 
 ### Optional: Hugging Face Token
 
@@ -391,6 +394,23 @@ Enable verbose logging:
 python main.py --verbose run-all --config config.json ...
 ```
 
+### Environment Issues
+
+If you encounter import errors:
+
+```bash
+# Ensure environment is activated
+source /workspace/venv/bin/activate
+
+# Set environment variables
+export WORKSPACE_DIR=/workspace
+export MODELS_DIR=/workspace/models
+export PYTHONPATH=/workspace:$PYTHONPATH
+
+# Test imports
+python -c "import sys; print('Python path:', sys.path)"
+```
+
 ## 📊 Hardware Recommendations
 
 ### Minimum Requirements
@@ -457,6 +477,24 @@ black .
 
 # Lint code
 flake8 .
+```
+
+## 🚀 Quick Environment Setup
+
+After running the setup script, activate your environment:
+
+```bash
+# Activate Python environment
+source /workspace/venv/bin/activate
+
+# Set environment variables
+export WORKSPACE_DIR=/workspace
+export MODELS_DIR=/workspace/models
+export PYTHONPATH=/workspace:$PYTHONPATH
+
+# Test the setup
+python main.py --help
+python scripts/create_example_dataset.py
 ```
 
 ## 📚 Examples

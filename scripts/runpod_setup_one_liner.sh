@@ -98,50 +98,12 @@ cat > config.json << 'EOF'
 }
 EOF
 
-# Create startup script
-cat > start.sh << 'EOF'
-#!/bin/bash
-echo "Starting WhyWouldYou-v2 environment..."
-source /workspace/venv/bin/activate
-export WORKSPACE_DIR=/workspace
-export MODELS_DIR=/workspace/models
-export EXTERNAL_DIR=/workspace/external
-export HF_HOME=/workspace/models
-export TRANSFORMERS_CACHE=/workspace/models
-export TORCH_HOME=/workspace/models
-export PYTHONPATH=/workspace:$PYTHONPATH
-cd /workspace
-
-if command -v nvidia-smi >/dev/null 2>&1; then
-    echo "GPU Information:"
-    nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv,noheader,nounits
-else
-    echo "No GPU detected, using CPU mode"
-fi
-
-echo ""
-echo "Available commands:"
-echo "  python main.py --help                    # Show all available commands"
-echo "  python main.py run-all --help            # Show run-all options"
-echo "  python scripts/create_example_dataset.py # Create test dataset"
-echo "  python tests/smoke_test.py               # Run smoke test"
-echo ""
-
-if [ "$1" = "jupyter" ]; then
-    echo "Starting Jupyter notebook..."
-    jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''
-else
-    echo "Environment ready! Use 'python main.py --help' to see available commands."
-    echo "To start Jupyter: ./start.sh jupyter"
-fi
-EOF
-
-chmod +x start.sh
+# Note: start.sh file creation removed as requested
 
 # Set permissions
 chmod -R 755 /workspace
 
-echo "Setup complete! Run './start.sh' to activate the environment."
+echo "Setup complete! Activate environment with: source /workspace/venv/bin/activate"
 echo ""
 echo "All models are FREE and open source! 🎉"
 echo "To download models, get a free HF token and run:"

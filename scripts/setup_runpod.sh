@@ -154,20 +154,7 @@ setup_python() {
     echo -e "${BLUE}Installing Python dependencies...${NC}"
     pip install -r "$PROJECT_ROOT/requirements.txt"
     
-    # Install additional useful packages
-    pip install \
-        jupyter \
-        ipywidgets \
-        matplotlib \
-        seaborn \
-        pandas \
-        scikit-learn \
-        scipy \
-        tqdm \
-        psutil \
-        GPUtil \
-        nvidia-ml-py3
-    
+        
     echo -e "${GREEN}✓ Python environment setup complete${NC}"
 }
 
@@ -348,57 +335,7 @@ EOF
     
     # Note: No .env file needed - all settings are in config.json and start.sh
     
-    # Create startup script
-    cat > "$WORKSPACE_DIR/start.sh" << 'EOF'
-#!/bin/bash
-
-# WhyWouldYou-v2 Startup Script for RunPod
-
-echo "Starting WhyWouldYou-v2 environment..."
-
-# Activate virtual environment
-source /workspace/venv/bin/activate
-
-# Set environment variables
-export WORKSPACE_DIR=/workspace
-export MODELS_DIR=/workspace/models
-export EXTERNAL_DIR=/workspace/external
-export HF_HOME=/workspace/models
-export TRANSFORMERS_CACHE=/workspace/models
-export TORCH_HOME=/workspace/models
-export PYTHONPATH=/workspace:$PYTHONPATH
-
-# Change to workspace directory
-cd /workspace
-
-# Check GPU
-if command -v nvidia-smi >/dev/null 2>&1; then
-    echo "GPU Information:"
-    nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv,noheader,nounits
-else
-    echo "No GPU detected, using CPU mode"
-fi
-
-# Show available commands
-echo ""
-echo "Available commands:"
-echo "  python main.py --help                    # Show all available commands"
-echo "  python main.py run-all --help            # Show run-all options"
-echo "  python scripts/create_example_dataset.py # Create test dataset"
-echo "  python tests/smoke_test.py               # Run smoke test"
-echo ""
-
-# Start Jupyter if requested
-if [ "$1" = "jupyter" ]; then
-    echo "Starting Jupyter notebook..."
-    jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''
-else
-    echo "Environment ready! Use 'python main.py --help' to see available commands."
-    echo "To start Jupyter: ./start.sh jupyter"
-fi
-EOF
-    
-    chmod +x "$WORKSPACE_DIR/start.sh"
+    # Note: start.sh file creation removed as requested
     
     echo -e "${GREEN}✓ Configuration files created${NC}"
 }
@@ -521,9 +458,11 @@ create_usage_instructions() {
    source /workspace/venv/bin/activate
    \`\`\`
 
-2. **Run the startup script:**
+2. **Set environment variables:**
    \`\`\`bash
-   ./start.sh
+   export WORKSPACE_DIR=/workspace
+   export MODELS_DIR=/workspace/models
+   export PYTHONPATH=/workspace:\$PYTHONPATH
    \`\`\`
 
 3. **Test the pipeline:**
@@ -674,7 +613,10 @@ main() {
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
     echo -e "${BLUE}1. Activate environment: source $WORKSPACE_DIR/venv/bin/activate${NC}"
-    echo -e "${BLUE}2. Run startup script: $WORKSPACE_DIR/start.sh${NC}"
+    echo -e "${BLUE}2. Set environment variables:${NC}"
+    echo -e "${BLUE}   export WORKSPACE_DIR=$WORKSPACE_DIR${NC}"
+    echo -e "${BLUE}   export MODELS_DIR=$MODELS_DIR${NC}"
+    echo -e "${BLUE}   export PYTHONPATH=$WORKSPACE_DIR:\$PYTHONPATH${NC}"
     echo -e "${BLUE}3. Test pipeline: python main.py --help${NC}"
     echo -e "${BLUE}4. Create example: python scripts/create_example_dataset.py${NC}"
     echo ""
