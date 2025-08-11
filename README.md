@@ -76,6 +76,53 @@ export HF_TOKEN='your_token_here'
 ```
 Get a free token at: https://huggingface.co/settings/tokens
 
+## 🐧 Linux Setup (One Command)
+
+The fastest way to set up on any Linux system with our automated script!
+
+### Quick Linux Setup
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/WhyWouldYou-v2.git
+   cd WhyWouldYou-v2
+   ```
+
+2. **Run the setup script** (one command):
+   ```bash
+   chmod +x scripts/setup_linux.sh
+   ./scripts/setup_linux.sh
+   ```
+
+3. **Activate the environment**:
+   ```bash
+   source setup_env.sh
+   ```
+
+4. **Test the pipeline**:
+   ```bash
+   python main.py --help
+   python tests/smoke_test.py
+   ```
+
+### What the Linux Setup Does
+
+✅ **Detects your Linux distribution** (Ubuntu, Debian, CentOS, RHEL, Fedora, Arch)  
+✅ **Installs all system dependencies** (Python, CUDA, FFmpeg, etc.)  
+✅ **Creates Python virtual environment** with all dependencies  
+✅ **Downloads all AI models** (Stable Diffusion, SVD, ControlNet, Wav2Lip, etc.)  
+✅ **Sets up configuration files** ready to use  
+✅ **Runs comprehensive tests** to ensure everything works  
+✅ **Creates environment script** for easy activation  
+✅ **All models are FREE and open source!** 🎉  
+
+### System Requirements for Linux Setup
+
+- **GPU**: NVIDIA GPU with 8GB+ VRAM (16GB+ recommended)
+- **RAM**: 16GB+ system RAM
+- **Storage**: 50GB+ free space (for models)
+- **OS**: Any modern Linux distribution (Ubuntu 20.04+, CentOS 7+, Fedora 30+, Arch)
+
 ### Local Installation
 
 If you prefer to set up locally:

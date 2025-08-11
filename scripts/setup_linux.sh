@@ -432,10 +432,7 @@ main() {
     echo ""
     
     # Check if running as root
-    if [ "$EUID" -eq 0 ]; then
-        print_error "Please do not run this script as root"
-        exit 1
-    fi
+    
     
     # Check if we're in the project directory
     if [ ! -f "$PROJECT_ROOT/requirements.txt" ]; then
