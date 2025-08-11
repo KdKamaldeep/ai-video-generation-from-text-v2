@@ -24,7 +24,58 @@ A complete, production-ready CLI pipeline for generating animated videos using S
 
 > 💡 **Need help?** Check our [documentation](docs/README.md) for detailed guides!
 
-### Installation
+## 🚀 RunPod Setup (Recommended)
+
+The easiest way to get started is using RunPod with our automated setup script!
+
+### Quick RunPod Setup
+
+1. **Start a RunPod instance** with:
+   - **GPU**: RTX 3080/4080/4090 or A100 (12GB+ VRAM recommended)
+   - **RAM**: 32GB+
+   - **Storage**: 100GB+
+   - **OS**: Ubuntu 20.04/22.04
+
+2. **Clone and setup** (copy-paste this into your RunPod terminal):
+   ```bash
+   cd /workspace
+   git clone https://github.com/yourusername/WhyWouldYou-v2.git .
+   chmod +x scripts/setup_runpod.sh
+   sudo ./scripts/setup_runpod.sh
+   ```
+
+3. **Activate and start**:
+   ```bash
+   source /workspace/venv/bin/activate
+   ./start.sh
+   ```
+
+4. **Test the pipeline**:
+   ```bash
+   python scripts/create_example_dataset.py
+   python main.py --help
+   ```
+
+### What the RunPod Setup Does
+
+✅ **Automatically installs** all system dependencies (ffmpeg, opencv, etc.)  
+✅ **Downloads all AI models** (Stable Diffusion, SVD, ControlNet, Wav2Lip, etc.)  
+✅ **Sets up Python environment** with CUDA support  
+✅ **Creates configuration files** ready to use  
+✅ **Runs tests** to ensure everything works  
+✅ **All models are FREE and open source!** 🎉
+
+### Optional: Hugging Face Token
+
+For faster model downloads, set your HF token:
+```bash
+export HF_TOKEN='your_token_here'
+```
+Get a free token at: https://huggingface.co/settings/tokens
+
+### Local Installation
+
+If you prefer to set up locally:
 
 1. **Clone the repository**:
    ```bash
