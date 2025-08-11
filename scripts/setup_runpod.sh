@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # WhyWouldYou-v2 RunPod Setup Script
-# This script sets up the complete pipeline environment on a RunPod instance
+# This script sets up the complete pipeline environment on a RunPod instance or pod
 
 set -e  # Exit on any error
 
@@ -55,15 +55,66 @@ check_system() {
     DISK_GB=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
     echo -e "${GREEN}✓ Available disk space: ${DISK_GB}GB${NC}"
     
-    # Check if we have enough disk space (need at least 50GB for models)
-    #if [ "$DISK_GB" -lt 50 ]; then
-    #    echo -e "${RED}✗ Insufficient disk space. Need at least 50GB, have ${DISK_GB}GB${NC}"
-    #    exit 1
-    #fi
+    # Check if we have enough disk space (need at least 20GB for models in pods, 50GB for full setup)
+    if [ "$DISK_GB" -lt 20 ]; then
+        echo -e "${RED}✗ Insufficient disk space. Need at least 20GB, have ${DISK_GB}GB${NC}"
+        echo -e "${YELLOW}Consider using a larger pod or cleaning up space${NC}"
+        exit 1
+    elif [ "$DISK_GB" -lt 50 ]; then
+        echo -e "${YELLOW}⚠ Limited disk space (${DISK_GB}GB). Some models may not be downloaded.${NC}"
+        echo -e "${BLUE}Models will be downloaded on-demand as needed.${NC}"
+    fi
 }
 
-# Function to update system packages
+# Function to check existing dependencies
+check_existing_deps() {
+    echo -e "${BLUE}Checking existing dependencies...${NC}"
+    
+    # Check Python
+    if command_exists python3; then
+        PYTHON_VERSION=$(python3 --version 2>&1)
+        echo -e "${GREEN}✓ Python: $PYTHON_VERSION${NC}"
+    else
+        echo -e "${RED}✗ Python3 not found${NC}"
+        return 1
+    fi
+    
+    # Check pip
+    if command_exists pip3; then
+        echo -e "${GREEN}✓ pip3 available${NC}"
+    else
+        echo -e "${RED}✗ pip3 not found${NC}"
+        return 1
+    fi
+    
+    # Check FFmpeg
+    if command_exists ffmpeg; then
+        FFMPEG_VERSION=$(ffmpeg -version | head -n1)
+        echo -e "${GREEN}✓ FFmpeg: $FFMPEG_VERSION${NC}"
+    else
+        echo -e "${YELLOW}⚠ FFmpeg not found - video processing may not work${NC}"
+    fi
+    
+    # Check CUDA
+    if command_exists nvcc; then
+        CUDA_VERSION=$(nvcc --version | grep release | awk '{print $6}' | cut -c2-)
+        echo -e "${GREEN}✓ CUDA: $CUDA_VERSION${NC}"
+    else
+        echo -e "${YELLOW}⚠ CUDA not found - will use CPU mode${NC}"
+    fi
+}
+
+# Function to update system packages (optional for pods)
 update_system() {
+    echo -e "${BLUE}Checking if system update is needed...${NC}"
+    
+    # Check if we're in a pod environment (common indicators)
+    if [ -f "/.dockerenv" ] || [ -f "/run/.containerenv" ] || [ -n "$KUBERNETES_SERVICE_HOST" ]; then
+        echo -e "${YELLOW}⚠ Detected container environment. Skipping system updates.${NC}"
+        echo -e "${BLUE}Most dependencies should already be available.${NC}"
+        return 0
+    fi
+    
     echo -e "${BLUE}Updating system packages...${NC}"
     
     # Update package lists
@@ -567,20 +618,28 @@ EOF
 main() {
     echo -e "${GREEN}Starting WhyWouldYou-v2 RunPod setup...${NC}"
     
-    # Check if running as root
+    # Check if running as root (only required for system updates)
+    NEED_ROOT=false
     if [ "$EUID" -ne 0 ]; then
-        echo -e "${RED}This script must be run as root (use sudo)${NC}"
-        exit 1
+        echo -e "${YELLOW}⚠ Not running as root. Some operations may be skipped.${NC}"
+        echo -e "${BLUE}If you encounter permission issues, run with sudo.${NC}"
+    else
+        NEED_ROOT=true
     fi
     
     # Check system
     check_system
     
+    # Check existing dependencies
+    check_existing_deps
+    
     # Check GPU
     check_gpu
     
-    # Update system
-    update_system
+    # Update system (only if root and not in container)
+    if [ "$NEED_ROOT" = true ]; then
+        update_system
+    fi
     
     # Setup project structure
     setup_project
@@ -621,6 +680,7 @@ main() {
     echo -e "${BLUE}4. Create example: python scripts/create_example_dataset.py${NC}"
     echo ""
     echo -e "${GREEN}Setup completed successfully!${NC}"
+    echo -e "${BLUE}See $WORKSPACE_DIR/USAGE.md for detailed instructions${NC}"
 }
 
 # Run main function
