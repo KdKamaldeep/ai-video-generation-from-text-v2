@@ -76,6 +76,14 @@ export HF_TOKEN='your_token_here'
 ```
 Get a free token at: https://huggingface.co/settings/tokens
 
+### Recent Improvements
+
+✅ **Fixed dependency conflicts** - Resolved scipy and torchaudio version issues  
+✅ **Improved error handling** - Better fallback installation for problematic packages  
+✅ **Enhanced compatibility** - Works with multiple Python versions (3.8+)  
+✅ **Better troubleshooting** - Clear error messages and solution guidance  
+✅ **No sudo required** - Works in restricted environments without elevated privileges
+
 ## 🐧 Linux Setup (One Command)
 
 The fastest way to set up on any Linux system with our automated script!
@@ -110,6 +118,7 @@ The fastest way to set up on any Linux system with our automated script!
 ✅ **Detects your Linux distribution** (Ubuntu, Debian, CentOS, RHEL, Fedora, Arch)  
 ✅ **Installs all system dependencies** (Python, CUDA, FFmpeg, etc.)  
 ✅ **Creates Python virtual environment** with all dependencies  
+✅ **Handles dependency conflicts** automatically with fallback installation  
 ✅ **Downloads all AI models** (Stable Diffusion, SVD, ControlNet, Wav2Lip, etc.)  
 ✅ **Sets up configuration files** ready to use  
 ✅ **Runs comprehensive tests** to ensure everything works  
@@ -123,9 +132,27 @@ The fastest way to set up on any Linux system with our automated script!
 - **Storage**: 50GB+ free space (for models)
 - **OS**: Any modern Linux distribution (Ubuntu 20.04+, CentOS 7+, Fedora 30+, Arch)
 
+### Troubleshooting Setup Issues
+
+If you encounter dependency conflicts or installation issues:
+
+1. **Dependency conflicts**: The script automatically handles these with fallback installation
+2. **Missing system packages**: The script will show you exactly what to install
+3. **CUDA issues**: The script checks CUDA installation and provides guidance
+4. **Permission issues**: Run as regular user (not root) - the script will guide you
+
+### Optional: Hugging Face Token
+
+For faster model downloads, set your HF token before running the setup:
+```bash
+export HF_TOKEN='your_token_here'
+./scripts/setup_linux.sh
+```
+Get a free token at: https://huggingface.co/settings/tokens
+
 ### Local Installation
 
-If you prefer to set up locally:
+If you prefer to set up manually:
 
 1. **Clone the repository**:
    ```bash
@@ -133,23 +160,39 @@ If you prefer to set up locally:
    cd WhyWouldYou-v2
    ```
 
-2. **Install dependencies**:
+2. **Install system dependencies** (Ubuntu/Debian example):
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y python3.10 python3.10-venv python3-pip git ffmpeg
+   ```
+
+3. **Create virtual environment**:
+   ```bash
+   python3.10 -m venv venv
+   source venv/bin/activate
+   pip install --upgrade pip setuptools wheel
+   ```
+
+4. **Install Python dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set up configuration**:
+5. **Set up configuration**:
    ```bash
    cp config.example.json config.json
    # Edit config.json with your settings
    ```
 
-4. **Download models** (optional):
+6. **Download models**:
    ```bash
-   # Create models directory
-   mkdir -p models
-   
-   # Download models as needed (see Models section below)
+   chmod +x scripts/download_models.sh
+   ./scripts/download_models.sh
+   ```
+
+7. **Set up environment**:
+   ```bash
+   source setup_env.sh
    ```
 
 ### Basic Usage
