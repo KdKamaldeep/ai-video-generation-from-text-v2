@@ -24,58 +24,6 @@ A complete, production-ready CLI pipeline for generating animated videos using S
 
 > 💡 **Need help?** Check our [documentation](docs/README.md) for detailed guides!
 
-## 🚀 RunPod Setup (Recommended)
-
-The easiest way to get started is using RunPod with our automated setup script!
-
-### Quick RunPod Setup
-
-1. **Start a RunPod instance** with:
-   - **GPU**: RTX 3080/4080/4090 or A100 (12GB+ VRAM recommended)
-   - **RAM**: 32GB+
-   - **Storage**: 100GB+
-   - **OS**: Ubuntu 20.04/22.04
-
-2. **Clone and setup** (copy-paste this into your RunPod terminal):
-   ```bash
-   cd /workspace
-   git clone https://github.com/yourusername/WhyWouldYou-v2.git .
-   chmod +x scripts/setup_runpod.sh
-   sudo ./scripts/setup_runpod.sh
-   ```
-
-3. **Activate environment**:
-   ```bash
-   source /workspace/venv/bin/activate
-   export WORKSPACE_DIR=/workspace
-   export MODELS_DIR=/workspace/models
-   export PYTHONPATH=/workspace:$PYTHONPATH
-   ```
-
-4. **Test the pipeline**:
-   ```bash
-   python scripts/create_example_dataset.py
-   python main.py --help
-   ```
-
-### What the RunPod Setup Does
-
-✅ **Automatically installs** all system dependencies (ffmpeg, opencv, etc.)  
-✅ **Downloads all AI models** (Stable Diffusion, SVD, ControlNet, Wav2Lip, etc.)  
-✅ **Sets up Python environment** with CUDA support  
-✅ **Creates configuration files** ready to use  
-✅ **Runs tests** to ensure everything works  
-✅ **All models are FREE and open source!** 🎉  
-✅ **No extra startup scripts** - direct environment activation
-
-### Optional: Hugging Face Token
-
-For faster model downloads, set your HF token:
-```bash
-export HF_TOKEN='your_token_here'
-```
-Get a free token at: https://huggingface.co/settings/tokens
-
 ### Recent Improvements
 
 ✅ **Fixed dependency conflicts** - Resolved scipy and torchaudio version issues  
@@ -284,8 +232,7 @@ WhyWouldYou-v2/
 ├── models/                # AI models directory
 │   └── README.md          # Models documentation
 ├── scripts/               # Setup and utility scripts
-│   ├── setup_runpod.sh    # RunPod setup script
-│   ├── runpod_setup_one_liner.sh # Quick RunPod setup
+│   ├── setup_linux.sh     # Linux setup script
 │   ├── download_models.sh # Model download script
 │   └── create_example_dataset.py # Example dataset creator
 ├── tests/                 # Test suite
@@ -629,7 +576,6 @@ python main.py run-all \
 ## 📚 Documentation
 
 - **[Environment Setup](docs/ENVIRONMENT_SETUP.md)** - How to set up your environment (no .env file needed!)
-- **[RunPod Deployment](docs/RUNPOD_DEPLOYMENT.md)** - Complete cloud GPU deployment guide
 - **[Licensing Guide](docs/LICENSING.md)** - Model licenses (all FREE and open source!)
 - **[Models Documentation](models/README.md)** - Required AI models and downloads
 
