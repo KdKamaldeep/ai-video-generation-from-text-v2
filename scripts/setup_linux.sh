@@ -265,7 +265,7 @@ setup_python_env() {
         print_warning "First attempt failed. Trying with --no-deps for problematic packages..."
         
         # Install core packages first
-        pip install torch>=2.0.0,<3.0.0 torchvision>=0.15.0,<1.0.0 torchaudio>=2.0.0,<1.0.0
+        pip install torch>=2.0.0,<3.0.0 torchvision>=0.15.0,<1.0.0 torchaudio>=2.0.1,<3.0.0
         pip install diffusers>=0.24.0,<1.0.0 transformers>=4.35.0,<5.0.0 accelerate>=0.24.0,<1.0.0
         pip install opencv-python>=4.8.0 Pillow>=10.0.0 numpy>=1.24.0 scipy>=1.11.2
         pip install librosa>=0.10.0,<1.0.0 soundfile>=0.12.0 mediapipe>=0.10.0
