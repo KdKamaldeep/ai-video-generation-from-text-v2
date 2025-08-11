@@ -1,0 +1,34 @@
+{
+  "sd_model": "runwayml/stable-diffusion-v1-5",
+  "svd_model": "stabilityai/stable-video-diffusion-img2vid-xt",
+  "controlnet_pose_model": null,
+  "lo_ra": null,
+  "ip_adapter_path": null,
+  "output_resolution": [1080, 1920],
+  "fps": 24,
+  "frames": 48,
+  "strength": 0.56,
+  "guidance_scale": 7.5,
+  "seed": 42,
+  "coqui_voice": {
+    "voice": "alloy",
+    "sample_rate": 24000,
+    "model": "tts_models/multilingual/multi-dataset/xtts_v2"
+  },
+  "wav2lip_enabled": true,
+  "wav2lip_model": "models/wav2lip.pth",
+  "face_detection_model": "models/s3fd.pth",
+  "post_rife": false,
+  "rife_fps": 48,
+  "post_smear": false,
+  "post_squash": false,
+  "crossfade_duration": 0.5,
+  "temp_dirs": {
+    "images": "images",
+    "motion": "motion",
+    "clips": "clips",
+    "audio": "audio",
+    "output": "output"
+  },
+  "gpu_device": "cuda:0"
+}
