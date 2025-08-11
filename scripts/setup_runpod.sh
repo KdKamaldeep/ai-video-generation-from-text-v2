@@ -677,7 +677,7 @@ main() {
     setup_project
     
     # Setup Python environment
-    setup_python
+   #setup_python
     
     # Download models
     download_models
