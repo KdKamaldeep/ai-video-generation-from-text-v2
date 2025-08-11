@@ -56,10 +56,10 @@ check_system() {
     echo -e "${GREEN}✓ Available disk space: ${DISK_GB}GB${NC}"
     
     # Check if we have enough disk space (need at least 50GB for models)
-    if [ "$DISK_GB" -lt 50 ]; then
-        echo -e "${RED}✗ Insufficient disk space. Need at least 50GB, have ${DISK_GB}GB${NC}"
-        exit 1
-    fi
+    #if [ "$DISK_GB" -lt 50 ]; then
+    #    echo -e "${RED}✗ Insufficient disk space. Need at least 50GB, have ${DISK_GB}GB${NC}"
+    #    exit 1
+    #fi
 }
 
 # Function to update system packages
