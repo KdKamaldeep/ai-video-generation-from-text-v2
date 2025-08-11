@@ -16,8 +16,21 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 WORKSPACE_DIR="/workspace"
-MODELS_DIR="$WORKSPACE_DIR/models"
-EXTERNAL_DIR="$WORKSPACE_DIR/external"
+
+# Check if pod volume is available (usually mounted at /workspace or /data)
+if [ -d "/data" ] && [ -w "/data" ]; then
+    echo -e "${GREEN}✓ Pod volume detected at /data${NC}"
+    MODELS_DIR="/data/models"
+    EXTERNAL_DIR="/data/external"
+elif [ -d "/workspace" ] && [ -w "/workspace" ]; then
+    echo -e "${GREEN}✓ Workspace volume detected at /workspace${NC}"
+    MODELS_DIR="/workspace/models"
+    EXTERNAL_DIR="/workspace/external"
+else
+    echo -e "${YELLOW}⚠ No writable volume detected, using local storage${NC}"
+    MODELS_DIR="$WORKSPACE_DIR/models"
+    EXTERNAL_DIR="$WORKSPACE_DIR/external"
+fi
 
 echo -e "${GREEN}=== WhyWouldYou-v2 RunPod Setup Script ===${NC}"
 echo -e "${BLUE}Setting up complete pipeline environment...${NC}"
@@ -51,18 +64,37 @@ check_system() {
     RAM_GB=$(free -g | awk '/^Mem:/{print $2}')
     echo -e "${GREEN}✓ RAM: ${RAM_GB}GB${NC}"
     
-    # Check disk space
-    DISK_GB=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
-    echo -e "${GREEN}✓ Available disk space: ${DISK_GB}GB${NC}"
+    # Check disk space for local storage
+    LOCAL_DISK_GB=$(df -BG / | awk 'NR==2 {print $4}' | sed 's/G//')
+    echo -e "${GREEN}✓ Available local disk space: ${LOCAL_DISK_GB}GB${NC}"
     
-    # Check if we have enough disk space (need at least 20GB for models in pods, 50GB for full setup)
-    if [ "$DISK_GB" -lt 20 ]; then
-        echo -e "${RED}✗ Insufficient disk space. Need at least 20GB, have ${DISK_GB}GB${NC}"
-        echo -e "${YELLOW}Consider using a larger pod or cleaning up space${NC}"
-        exit 1
-    elif [ "$DISK_GB" -lt 50 ]; then
-        echo -e "${YELLOW}⚠ Limited disk space (${DISK_GB}GB). Some models may not be downloaded.${NC}"
-        echo -e "${BLUE}Models will be downloaded on-demand as needed.${NC}"
+    # Check pod volume space if available
+    if [ "$MODELS_DIR" != "$WORKSPACE_DIR/models" ]; then
+        VOLUME_PATH=$(dirname "$MODELS_DIR")
+        VOLUME_DISK_GB=$(df -BG "$VOLUME_PATH" | awk 'NR==2 {print $4}' | sed 's/G//')
+        echo -e "${GREEN}✓ Available pod volume space: ${VOLUME_DISK_GB}GB${NC}"
+        
+        # Use pod volume space for model requirements
+        if [ "$VOLUME_DISK_GB" -lt 20 ]; then
+            echo -e "${RED}✗ Insufficient pod volume space. Need at least 20GB, have ${VOLUME_DISK_GB}GB${NC}"
+            echo -e "${YELLOW}Consider using a larger pod volume or cleaning up space${NC}"
+            exit 1
+        elif [ "$VOLUME_DISK_GB" -lt 50 ]; then
+            echo -e "${YELLOW}⚠ Limited pod volume space (${VOLUME_DISK_GB}GB). Some models may not be downloaded.${NC}"
+            echo -e "${BLUE}Models will be downloaded on-demand as needed.${NC}"
+        else
+            echo -e "${GREEN}✓ Sufficient pod volume space for all models${NC}"
+        fi
+    else
+        # Fallback to local storage check
+        if [ "$LOCAL_DISK_GB" -lt 20 ]; then
+            echo -e "${RED}✗ Insufficient disk space. Need at least 20GB, have ${LOCAL_DISK_GB}GB${NC}"
+            echo -e "${YELLOW}Consider using a larger pod or cleaning up space${NC}"
+            exit 1
+        elif [ "$LOCAL_DISK_GB" -lt 50 ]; then
+            echo -e "${YELLOW}⚠ Limited disk space (${LOCAL_DISK_GB}GB). Some models may not be downloaded.${NC}"
+            echo -e "${BLUE}Models will be downloaded on-demand as needed.${NC}"
+        fi
     fi
 }
 
@@ -669,6 +701,14 @@ main() {
     echo -e "${BLUE}Workspace: $WORKSPACE_DIR${NC}"
     echo -e "${BLUE}Models: $MODELS_DIR${NC}"
     echo -e "${BLUE}Configuration: $WORKSPACE_DIR/config.json${NC}"
+    
+    # Show storage information
+    if [ "$MODELS_DIR" != "$WORKSPACE_DIR/models" ]; then
+        echo -e "${GREEN}✓ Models stored on pod volume for persistence${NC}"
+    else
+        echo -e "${YELLOW}⚠ Models stored on local storage (may not persist)${NC}"
+    fi
+    
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
     echo -e "${BLUE}1. Activate environment: source $WORKSPACE_DIR/venv/bin/activate${NC}"
